@@ -1,5 +1,9 @@
 from cambc import *
 
+#to do-
+#make fucntion for placing marker when unoccupied titatnium is found
+#make function for movement of builder bot towards titanium
+#create a case where where we found a marker for titanium later and we have to restart search
 class Player:
     def __init__(self):
         self.core_pos: Position | None = None
@@ -8,6 +12,8 @@ class Player:
         self.map_width: int | None=None
         self.map_height: int |None=None
         self.occupied_titanium: list[Position]|None=None
+        self.builder_bot_titanium_search: bool|None=None
+        self.builder_bot_titnium_search_pos: Position |None=None
 
 
 
@@ -57,10 +63,18 @@ class Player:
         self.nearby_tiles = ct.get_nearby_tiles()
         for i in self.nearby_tiles:
             if ct.get_entity_type(ct.get_tile_building_id(i))==EntityType.MARKER:
-                self.marker_position_decode(i)
+                self.occupied_titanium.append(self.marker_position_decode(i))
                 #only for titanium as of now
-            elif ct.get_tile_env(i)==Environement.ORE_TITANIUM:
-                self.move(i)
+
+        if self.builder_bot_titanium_search==False:
+            for i in self.nearby_tiles:       
+                if ct.get_tile_env(i)==Environement.ORE_TITANIUM and i not in self.occupied_titanium:
+                    self.builder_bot_titanium_search=True
+                    self.builder_bot_titnium_search_pos=i
+                    
+                    self.place_marker(i,ct.get_position())
+                    self.move(i)
+                    break
             
     #Gives the coordinate of the position on the marker
     def marker_position_decode(self,ct:controller)->Position:
